@@ -38,6 +38,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['everydaygobez.vercel.app', 'localhost', '127.0.0.1', '.vercel.app']
 
+# Ensure Django knows it's behind an HTTPS proxy (Vercel) to build absolute URIs correctly
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
