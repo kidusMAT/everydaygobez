@@ -14,7 +14,6 @@ db.sqlite3-journal
 
 # Media files and uploads
 media/
-staticfiles/
 
 # Google Client Credentials (since we moved them safely into settings)
 client_secret*.json
@@ -22,3 +21,4 @@ client_secret*.json
 # OS files
 .DS_Store
 Thumbs.db
+.env
