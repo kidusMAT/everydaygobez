@@ -142,7 +142,7 @@ def google_callback(request):
             counter += 1
             
         try:
-            password = User.objects.make_random_password()
+            password = secrets.token_urlsafe(16)
             user = User.objects.create_user(username=username, email=email, password=password)
             
             profile = user.profile
