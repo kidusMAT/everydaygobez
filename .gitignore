@@ -1,0 +1,24 @@
+# Virtual environment
+venv/
+ENV/
+env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases
+db.sqlite3
+db.sqlite3-journal
+
+# Media files and uploads
+media/
+staticfiles/
+
+# Google Client Credentials (since we moved them safely into settings)
+client_secret*.json
+
+# OS files
+.DS_Store
+Thumbs.db

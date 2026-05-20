@@ -1,0 +1,21 @@
+{
+  "builds": [
+    {
+      "src": "everyday_gobez/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 15
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "everyday_gobez/wsgi.py"
+    }
+  ]
+}

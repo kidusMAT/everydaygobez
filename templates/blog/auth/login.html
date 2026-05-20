@@ -1,0 +1,49 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Login | Everyday Gobez{% endblock %}
+
+{% block content %}
+<div class="auth-section-container">
+    <div class="auth-card glass-panel">
+        <div class="auth-header">
+            <span class="auth-emoji">🔑</span>
+            <h2>Welcome Back!</h2>
+            <p>Log in to your account and share your everyday gobez insights.</p>
+        </div>
+
+        <form method="POST" action="{% url 'login' %}" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group-floating">
+                <input type="text" name="username" id="username" placeholder=" " required autocomplete="username">
+                <label for="username"><i class="fa-regular fa-user"></i> Username or Email</label>
+                <div class="input-focus-line"></div>
+            </div>
+
+            <div class="form-group-floating">
+                <input type="password" name="password" id="password" placeholder=" " required autocomplete="current-password">
+                <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+                <div class="input-focus-line"></div>
+            </div>
+
+            <button type="submit" class="auth-submit-btn">
+                <span>Sign In</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </button>
+        </form>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0;">
+            <div style="flex: 1; height: 1px; background: #000000;"></div>
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #555555; letter-spacing: 0.5px;">Or</span>
+            <div style="flex: 1; height: 1px; background: #000000;"></div>
+        </div>
+
+        <a href="{% url 'google_login' %}" class="google-auth-btn" onmouseover="this.style.background='#000000'; this.style.color='#ffffff';" onmouseout="this.style.background='#ffffff'; this.style.color='#000000';" style="width: 100%; border: 1px solid #000000; background: #ffffff; color: #000000; padding: 12px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s ease-in-out; border-radius: 0px; text-decoration: none; box-sizing: border-box;">
+            <i class="fa-brands fa-google"></i> Continue with Google
+        </a>
+
+        <div class="auth-footer-notes">
+            <p>New to Everyday Gobez? <a href="{% url 'register' %}">Create an account</a> and start blogging!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

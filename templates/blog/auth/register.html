@@ -1,0 +1,104 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Register | Everyday Gobez{% endblock %}
+
+{% block content %}
+<div class="auth-section-container">
+    <div class="auth-card glass-panel register-card">
+        <div class="auth-header">
+            <span class="auth-emoji">✍️</span>
+            <h2>Join the Gobez Community</h2>
+            <p>Create an account, customize your profile, and start sharing your knowledge with the world!</p>
+        </div>
+
+        <form method="POST" action="{% url 'register' %}" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-grid-2-cols">
+                <div class="form-group-floating">
+                    <input type="text" name="username" id="username" placeholder=" " required autocomplete="username">
+                    <label for="username"><i class="fa-regular fa-user"></i> Username</label>
+                    <div class="input-focus-line"></div>
+                </div>
+
+                <div class="form-group-floating">
+                    <input type="email" name="email" id="email" placeholder=" " required autocomplete="email">
+                    <label for="email"><i class="fa-regular fa-envelope"></i> Email Address</label>
+                    <div class="input-focus-line"></div>
+                </div>
+            </div>
+
+            <div class="form-grid-2-cols">
+                <div class="form-group-floating">
+                    <input type="password" name="password" id="password" placeholder=" " required autocomplete="new-password">
+                    <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+                    <div class="input-focus-line"></div>
+                </div>
+
+                <div class="form-group-floating">
+                    <input type="password" name="confirm_password" id="confirm_password" placeholder=" " required autocomplete="new-password">
+                    <label for="confirm_password"><i class="fa-solid fa-check-double"></i> Confirm Password</label>
+                    <div class="input-focus-line"></div>
+                </div>
+            </div>
+
+            <div class="form-group-floating">
+                <input type="text" name="display_name" id="display_name" placeholder=" ">
+                <label for="display_name"><i class="fa-regular fa-id-card"></i> Display Name (e.g. Clever Dev)</label>
+                <div class="input-focus-line"></div>
+            </div>
+
+            <!-- Custom Avatar Emoji Picker -->
+            <div class="avatar-picker-section">
+                <label class="section-label">Select Your Author Avatar Emoji</label>
+                <input type="hidden" name="avatar_emoji" id="avatar_emoji_input" value="🚀">
+                
+                <div class="emoji-selector-grid">
+                    {% for emoji in emojis %}
+                        <button type="button" class="emoji-choice-btn {% if emoji == '🚀' %}selected{% endif %}" data-emoji="{{ emoji }}">
+                            {{ emoji }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group-floating textarea-group">
+                <textarea name="bio" id="bio" placeholder=" " rows="3"></textarea>
+                <label for="bio"><i class="fa-solid fa-circle-info"></i> Short Biography (Tell the readers about yourself...)</label>
+                <div class="input-focus-line"></div>
+            </div>
+
+            <button type="submit" class="auth-submit-btn">
+                <span>Create Account</span> <i class="fa-solid fa-user-plus"></i>
+            </button>
+        </form>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0;">
+            <div style="flex: 1; height: 1px; background: #000000;"></div>
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #555555; letter-spacing: 0.5px;">Or</span>
+            <div style="flex: 1; height: 1px; background: #000000;"></div>
+        </div>
+
+        <a href="{% url 'google_login' %}" class="google-auth-btn" onmouseover="this.style.background='#000000'; this.style.color='#ffffff';" onmouseout="this.style.background='#ffffff'; this.style.color='#000000';" style="width: 100%; border: 1px solid #000000; background: #ffffff; color: #000000; padding: 12px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s ease-in-out; border-radius: 0px; text-decoration: none; box-sizing: border-box;">
+            <i class="fa-brands fa-google"></i> Continue with Google
+        </a>
+
+        <div class="auth-footer-notes">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Avatar emoji selection logic
+    document.querySelectorAll('.emoji-choice-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.emoji-choice-btn').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('avatar_emoji_input').value = this.getAttribute('data-emoji');
+        });
+    });
+</script>
+{% endblock %}

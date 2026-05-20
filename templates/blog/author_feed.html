@@ -1,0 +1,89 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ author_user.profile.name }}'s Feed | Everyday Gobez{% endblock %}
+
+{% block content %}
+<div class="author-feed-wrapper">
+    <!-- Back to Feed link -->
+    <div class="navigation-back-link">
+        <a href="{% url 'post_list' %}"><i class="fa-solid fa-arrow-left"></i> Back to Feed</a>
+    </div>
+
+    <!-- Immersive Author Profile Card -->
+    <section class="author-profile-hero glass-panel">
+        <div class="profile-header-cols">
+            <div class="profile-avatar-wrapper">
+                <span class="profile-avatar-emoji-lg">{{ author_user.profile.avatar_emoji }}</span>
+            </div>
+            
+            <div class="profile-text-wrapper">
+                <div class="name-edit-row">
+                    <h2>{{ author_user.profile.name }}</h2>
+                    {% if request.user == author_user %}
+                        <a href="{% url 'profile_edit' %}" class="btn-profile-edit" title="Edit Profile">
+                            <i class="fa-regular fa-pen-to-square"></i> Edit Profile
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <span class="user-handle">@{{ author_user.username }}</span>
+                <p class="profile-bio-text">{{ author_user.profile.bio }}</p>
+                
+                <div class="profile-stats-chips">
+                    <span class="stat-chip"><i class="fa-solid fa-book-open"></i> {{ posts.count }} Stories Published</span>
+                    <span class="stat-chip"><i class="fa-solid fa-feather"></i> Member since {{ author_user.date_joined|date:"M Y" }}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Author Publications Feed Grid -->
+    <section class="author-stories-feed">
+        <h3 class="section-heading">Stories Written by {{ author_user.profile.name }}</h3>
+
+        {% if posts %}
+            <div class="articles-grid">
+                {% for post in posts %}
+                    <article class="article-card glass-panel">
+                        <div class="card-top">
+                            <div class="card-meta">
+                                {% if post.category %}
+                                    <span class="category-badge" style="--badge-color: {{ post.category.color_accent }}">
+                                        {{ post.category.name }}
+                                    </span>
+                                {% endif %}
+                                <span class="read-duration">{{ post.reading_time_minutes }} min read</span>
+                            </div>
+                            
+                            <h4 class="card-title">
+                                <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+                            </h4>
+                            
+                            <p class="card-excerpt">{{ post.excerpt }}</p>
+                        </div>
+                        
+                        <div class="card-bottom">
+                            <hr class="card-divider">
+                            <div class="card-author-row">
+                                <span class="post-date-raw"><i class="fa-regular fa-calendar"></i> Published {{ post.date_created|date:"M d, Y" }}</span>
+                                <div class="views-compact">
+                                    <i class="fa-regular fa-eye"></i> {{ post.views_count }}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-feed-section glass-panel">
+                <span class="empty-icon">📝</span>
+                <h3>No Stories Yet</h3>
+                <p>This author has not published any blog posts yet. Check back soon for clever insights!</p>
+                {% if request.user == author_user %}
+                    <a href="{% url 'post_create' %}" class="nav-btn-solid mt-4">Write Your First Post</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

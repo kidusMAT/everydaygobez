@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Everyday Gobez | Premium Blogging Platform{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Bespoke CSS stylesheet -->
+    <link rel="stylesheet" href="{% static 'blog/css/styles.css' %}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Premium Interactive Glowing Background Grid & Blobs -->
+    <div class="glass-bg-container">
+        <div class="glow-blob blob-1"></div>
+        <div class="glow-blob blob-2"></div>
+        <div class="glow-blob blob-3"></div>
+    </div>
+
+    <!-- Immersive Reading Scroll Progress Indicator (shown on detail view) -->
+    <div id="scroll-progress" class="scroll-progress-bar"></div>
+
+    <!-- Navigation Header with Glassmorphic styling -->
+    <header class="navbar-header">
+        <div class="navbar-container">
+            <a href="{% url 'post_list' %}" class="navbar-logo">
+                <span class="logo-accent">Everyday</span>Gobez<span class="logo-dot">.</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="{% url 'post_list' %}" class="nav-link {% if request.resolver_match.url_name == 'post_list' %}active{% endif %}">
+                    <i class="fa-solid fa-house-chimney"></i> Feed
+                </a>
+                <a href="{% url 'contact_us' %}" class="nav-link {% if request.resolver_match.url_name == 'contact_us' %}active{% endif %}">
+                    <i class="fa-regular fa-envelope"></i> Contact
+                </a>
+                
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'post_create' %}" class="nav-link {% if request.resolver_match.url_name == 'post_create' %}active{% endif %}">
+                        <i class="fa-solid fa-pen-nib"></i> Write
+                    </a>
+                    
+                    <div class="nav-profile-dropdown">
+                        <button class="nav-profile-trigger">
+                            <span class="avatar-badge">{{ request.user.profile.avatar_emoji }}</span>
+                            <span class="profile-username">{{ request.user.profile.name }}</span>
+                            <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="{% url 'author_feed' request.user.username %}" class="dropdown-item">
+                                <i class="fa-regular fa-folder-open"></i> My Blogs
+                            </a>
+                            <a href="{% url 'profile_edit' %}" class="dropdown-item">
+                                <i class="fa-regular fa-user-circle"></i> Edit Profile
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{% url 'logout' %}" class="dropdown-item text-danger">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-btn-outline">Login</a>
+                    <a href="{% url 'register' %}" class="nav-btn-solid">Get Started</a>
+                {% endif %}
+            </nav>
+
+            <!-- Responsive Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer Navigation -->
+    <div class="mobile-nav-drawer">
+        <div class="drawer-header">
+            <span class="navbar-logo">Everyday<span class="logo-accent">Gobez</span></span>
+            <button class="drawer-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer-links">
+            <a href="{% url 'post_list' %}" class="drawer-link"><i class="fa-solid fa-house-chimney"></i> Feed</a>
+            <a href="{% url 'contact_us' %}" class="drawer-link"><i class="fa-regular fa-envelope"></i> Contact Us</a>
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'post_create' %}" class="drawer-link"><i class="fa-solid fa-pen-nib"></i> Write Post</a>
+                <a href="{% url 'author_feed' request.user.username %}" class="drawer-link"><i class="fa-regular fa-folder-open"></i> My Blogs</a>
+                <a href="{% url 'profile_edit' %}" class="drawer-link"><i class="fa-regular fa-user-circle"></i> Edit Profile</a>
+                <a href="{% url 'logout' %}" class="drawer-link text-danger"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="drawer-btn-outline">Login</a>
+                <a href="{% url 'register' %}" class="drawer-btn-solid">Get Started</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Alert / Toast Messages Block -->
+    {% if messages %}
+        <div class="toast-messages-container">
+            {% for message in messages %}
+                <div class="toast-card toast-{{ message.tags }}">
+                    <div class="toast-content">
+                        <i class="toast-icon fa-solid 
+                            {% if message.tags == 'success' %}fa-circle-check
+                            {% elif message.tags == 'error' %}fa-circle-xmark
+                            {% elif message.tags == 'warning' %}fa-triangle-exclamation
+                            {% else %}fa-circle-info{% endif %}">
+                        </i>
+                        <span class="toast-message">{{ message }}</span>
+                    </div>
+                    <button class="toast-close-btn">&times;</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer of the Website -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="{% url 'post_list' %}" class="navbar-logo">Everyday<span class="logo-accent">Gobez</span></a>
+                <p class="footer-tagline">Empowering developers, designers, and creatives to share smart insights, clever solutions, and write beautiful stories every single day.</p>
+            </div>
+            
+            <div class="footer-links-group">
+                <h4>Navigation</h4>
+                <a href="{% url 'post_list' %}">Main Feed</a>
+                <a href="{% url 'contact_us' %}">Contact Us</a>
+                {% if not request.user.is_authenticated %}
+                    <a href="{% url 'login' %}">Login</a>
+                    <a href="{% url 'register' %}">Register</a>
+                {% else %}
+                    <a href="{% url 'post_create' %}">Write a Post</a>
+                {% endif %}
+            </div>
+
+            <div class="footer-links-group">
+                <h4>Gobez Philosophy</h4>
+                <p class="philosophy-text">ጎበዝ (Gobez) represents consistency, resilience, execution intelligence, and daily personal leveling up. Stay clever, keep sharing!</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {% now "Y" %} Everyday Gobez. Made for clever minds. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Core Interactive Animations JS script -->
+    <script src="{% static 'blog/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

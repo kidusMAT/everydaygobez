@@ -1,0 +1,174 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Everyday Gobez | Learn, Write & Level Up{% endblock %}
+
+{% block content %}
+<!-- Hero Section & Live Search Banner -->
+<section class="hero-search-section">
+    <div class="hero-content">
+        <h1 class="hero-title">Thoughts of the <span class="text-glow">Gobez</span> Minds.</h1>
+        <p class="hero-subtitle">A collaborative multi-author journal on tech, design, growth, and clever problem-solving. Dive into excellent stories written by practitioners.</p>
+    </div>
+    
+    <!-- Search Form -->
+    <form method="GET" action="{% url 'post_list' %}" class="search-form-container glass-panel">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" name="search" placeholder="Search posts, topics, authors..." value="{{ search_query }}">
+        <button type="submit" class="search-btn">Search</button>
+    </form>
+</section>
+
+<!-- Category Filtering Navigation Chip Bar -->
+<section class="category-chip-section">
+    <span class="filter-label"><i class="fa-solid fa-tags"></i> Topics:</span>
+    <div class="category-chips-wrapper">
+        <a href="{% url 'post_list' %}" class="category-chip {% if not selected_category %}active{% endif %}">
+            All Stories
+        </a>
+        {% for category in categories %}
+            <a href="{% url 'category_filter' category.slug %}" 
+               class="category-chip {% if selected_category.slug == category.slug %}active{% endif %}"
+               style="--chip-accent: {{ category.color_accent }}">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+    </div>
+</section>
+
+{% if posts %}
+    <!-- Featured Article Banner (Only on the home page with no search/category filters or as first result) -->
+    {% if not search_query and not selected_category and featured_post %}
+        <section class="featured-article-container">
+            <div class="featured-card glass-panel">
+                <div class="featured-info-col">
+                    <div class="meta-row">
+                        {% if featured_post.category %}
+                            <span class="category-badge" style="--badge-color: {{ featured_post.category.color_accent }}">
+                                {{ featured_post.category.name }}
+                            </span>
+                        {% endif %}
+                        <span class="reading-time"><i class="fa-regular fa-clock"></i> {{ featured_post.reading_time_minutes }} min read</span>
+                    </div>
+
+                    <h2 class="featured-title">
+                        <a href="{% url 'post_detail' featured_post.slug %}">{{ featured_post.title }}</a>
+                    </h2>
+                    
+                    <p class="featured-excerpt">{{ featured_post.excerpt }}</p>
+
+                    <div class="author-row">
+                        <a href="{% url 'author_feed' featured_post.author.username %}" class="author-avatar-link">
+                            <span class="author-avatar">{{ featured_post.author.profile.avatar_emoji }}</span>
+                        </a>
+                        <div class="author-info">
+                            <a href="{% url 'author_feed' featured_post.author.username %}" class="author-name">
+                                {{ featured_post.author.profile.name }}
+                            </a>
+                            <span class="post-date">{{ featured_post.date_created|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="meta-views">
+                            <i class="fa-regular fa-eye"></i> {{ featured_post.views_count }} views
+                        </div>
+                    </div>
+
+                    <a href="{% url 'post_detail' featured_post.slug %}" class="read-more-btn-glow">
+                        <span>Read Full Story</span> <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="featured-graphic-col" style="background: #ffffff; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100%; min-height: 250px;">
+                    {% if featured_post.post_image %}
+                        <a href="{% url 'post_detail' featured_post.slug %}" style="width: 100%; height: 100%; display: block;">
+                            <img src="{{ featured_post.post_image.url }}" alt="{{ featured_post.title }}" style="width: 100%; height: 100%; object-fit: cover; border-left: 1px solid #000000;">
+                        </a>
+                    {% else %}
+                        <div class="glass-graphic-wrapper" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <div class="graphic-text">
+                                <span class="graphic-logo" style="color: #ffffff;">E.G.</span>
+                                <span class="graphic-status" style="color: #ffffff;">FEATURED</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Articles Feed Grid -->
+    <section class="articles-feed-section">
+        <h3 class="section-heading">
+            {% if search_query %}
+                Search Results for "{{ search_query }}" ({{ posts.count }})
+            {% elif selected_category %}
+                Stories in {{ selected_category.name }} ({{ posts.count }})
+            {% else %}
+                Recent Publications
+            {% endif %}
+        </h3>
+
+        <div class="articles-grid">
+            {% for post in posts %}
+                <!-- Skip featured post on main listing to avoid duplicate layout clutter -->
+                {% if not forloop.first or search_query or selected_category %}
+                    <article class="article-card glass-panel" style="display: flex; flex-direction: column;">
+                        {% if post.post_image %}
+                            <div class="card-cover-wrapper" style="border-bottom: 1px solid #000000; overflow: hidden; height: 160px; background: #ffffff; width: 100%;">
+                                <a href="{% url 'post_detail' post.slug %}" style="display: block; width: 100%; height: 100%;">
+                                    <img src="{{ post.post_image.url }}" alt="{{ post.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </a>
+                            </div>
+                        {% endif %}
+                        <div class="card-top">
+                            <div class="card-meta">
+                                {% if post.category %}
+                                    <span class="category-badge" style="--badge-color: {{ post.category.color_accent }}">
+                                        {{ post.category.name }}
+                                    </span>
+                                {% endif %}
+                                <span class="read-duration">{{ post.reading_time_minutes }} min read</span>
+                            </div>
+                            
+                            <h4 class="card-title">
+                                <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+                            </h4>
+                            
+                            <p class="card-excerpt">{{ post.excerpt }}</p>
+                        </div>
+                        
+                        <div class="card-bottom">
+                            <hr class="card-divider">
+                            <div class="card-author-row">
+                                <div class="author-compact">
+                                    <span class="author-avatar-sm">{{ post.author.profile.avatar_emoji }}</span>
+                                    <div class="author-compact-meta">
+                                        <a href="{% url 'author_feed' post.author.username %}" class="author-compact-name">
+                                            {{ post.author.profile.name }}
+                                        </a>
+                                        <span class="author-compact-date">{{ post.date_created|date:"M d" }}</span>
+                                    </div>
+                                </div>
+                                <div class="views-compact">
+                                    <i class="fa-regular fa-eye"></i> {{ post.views_count }}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+
+{% else %}
+    <!-- Empty Feed State -->
+    <section class="empty-feed-section glass-panel">
+        <span class="empty-icon">📭</span>
+        <h3>No Publications Found</h3>
+        <p>We couldn't find any articles matching your search query or filters. Be the first to share a smart blog about this topic!</p>
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'post_create' %}" class="nav-btn-solid mt-4">Write First Post</a>
+        {% else %}
+            <a href="{% url 'register' %}" class="nav-btn-solid mt-4">Get Started</a>
+        {% endif %}
+    </section>
+{% endif %}
+{% endblock %}

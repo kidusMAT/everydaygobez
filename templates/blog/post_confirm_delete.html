@@ -1,0 +1,28 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Delete Post | Everyday Gobez{% endblock %}
+
+{% block content %}
+<div class="auth-section-container">
+    <div class="auth-card glass-panel delete-confirmation-card">
+        <div class="auth-header">
+            <span class="auth-emoji text-danger">⚠️</span>
+            <h2 class="text-danger">Delete This Article?</h2>
+            <p>Are you absolutely sure you want to permanently delete your post: <strong>"{{ post.title }}"</strong>? This action cannot be undone.</p>
+        </div>
+
+        <form method="POST" action="{% url 'post_delete' post.slug %}" class="auth-form mt-4">
+            {% csrf_token %}
+            
+            <div class="editor-buttons-row justify-content-center">
+                <a href="{% url 'post_detail' post.slug %}" class="btn-editor-cancel">
+                    No, Cancel
+                </a>
+                <button type="submit" class="btn-editor-submit btn-danger">
+                    <i class="fa-solid fa-trash-can"></i> Yes, Delete Permanently
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Edit Profile | Everyday Gobez{% endblock %}
+
+{% block content %}
+<div class="auth-section-container">
+    <div class="auth-card glass-panel">
+        <div class="auth-header">
+            <span class="auth-emoji">⚙️</span>
+            <h2>Customize Your Profile</h2>
+            <p>Modify your writer bio, update your display identity, or select a new avatar emoji.</p>
+        </div>
+
+        <form method="POST" action="{% url 'profile_edit' %}" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group-floating">
+                <input type="text" name="display_name" id="display_name" placeholder=" " value="{{ profile.display_name }}" required>
+                <label for="display_name"><i class="fa-regular fa-id-card"></i> Display Name</label>
+                <div class="input-focus-line"></div>
+            </div>
+
+            <!-- Custom Avatar Emoji Picker -->
+            <div class="avatar-picker-section">
+                <label class="section-label">Select Your Profile Emoji</label>
+                <input type="hidden" name="avatar_emoji" id="avatar_emoji_input" value="{{ profile.avatar_emoji }}">
+                
+                <div class="emoji-selector-grid">
+                    {% for emoji in emojis %}
+                        <button type="button" class="emoji-choice-btn {% if emoji == profile.avatar_emoji %}selected{% endif %}" data-emoji="{{ emoji }}">
+                            {{ emoji }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group-floating textarea-group">
+                <textarea name="bio" id="bio" placeholder=" " rows="4">{{ profile.bio }}</textarea>
+                <label for="bio"><i class="fa-solid fa-circle-info"></i> Short Biography</label>
+                <div class="input-focus-line"></div>
+            </div>
+
+            <button type="submit" class="auth-submit-btn">
+                <span>Save Updates</span> <i class="fa-solid fa-circle-check"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Avatar emoji selection logic
+    document.querySelectorAll('.emoji-choice-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.emoji-choice-btn').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('avatar_emoji_input').value = this.getAttribute('data-emoji');
+        });
+    });
+</script>
+{% endblock %}

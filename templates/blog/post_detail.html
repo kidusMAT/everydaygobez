@@ -1,0 +1,263 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ post.title }} | Everyday Gobez{% endblock %}
+
+{% block content %}
+<article class="immersive-post-container">
+    <!-- Back to Feed link -->
+    <div class="navigation-back-link">
+        <a href="{% url 'post_list' %}"><i class="fa-solid fa-arrow-left"></i> Back to Feed</a>
+    </div>
+
+    <!-- Article Header Card -->
+    <header class="post-detail-header glass-panel">
+        <div class="post-header-meta">
+            {% if post.category %}
+                <span class="category-badge" style="--badge-color: {{ post.category.color_accent }}">
+                    {{ post.category.name }}
+                </span>
+            {% endif %}
+            <span class="post-header-date"><i class="fa-regular fa-calendar"></i> Published {{ post.date_created|date:"F d, Y" }}</span>
+            <span class="post-header-read-time"><i class="fa-regular fa-clock"></i> {{ post.reading_time_minutes }} min read</span>
+        </div>
+
+        <h1 class="post-detail-title">{{ post.title }}</h1>
+
+        <!-- Author Signature and Views Panel -->
+        <div class="post-header-author-panel">
+            <div class="author-details-wrapper">
+                <span class="author-avatar">{{ post.author.profile.avatar_emoji }}</span>
+                <div class="author-info-meta">
+                    <span class="written-by-label">WRITTEN BY</span>
+                    <a href="{% url 'author_feed' post.author.username %}" class="author-display-name">
+                        {{ post.author.profile.name }}
+                    </a>
+                </div>
+            </div>
+            
+            <div class="post-stats-wrapper">
+                <div class="stat-badge"><i class="fa-regular fa-eye"></i> {{ post.views_count }} Views</div>
+                
+                <!-- Edit/Delete Author Actions (Visible only to post creator) -->
+                {% if request.user == post.author %}
+                    <div class="post-owner-actions">
+                        <a href="{% url 'post_edit' post.slug %}" class="btn-action-edit" title="Edit Post">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </a>
+                        <a href="{% url 'post_delete' post.slug %}" class="btn-action-delete" title="Delete Post">
+                            <i class="fa-solid fa-trash-can"></i> Delete
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Immersive Reading Content Body -->
+    <section class="post-body-content glass-panel">
+        {% if post.post_image %}
+            <div class="post-detail-cover-wrapper" style="border-bottom: 1px solid #000000; margin-bottom: 25px; padding-bottom: 25px; text-align: center;">
+                <img src="{{ post.post_image.url }}" alt="{{ post.title }}" style="max-width: 100%; height: auto; border: 1px solid #000000; display: block; margin: 0 auto;">
+            </div>
+        {% endif %}
+
+        <div class="content-rich-text">
+            {{ post.content|linebreaks }}
+        </div>
+
+        {% if post.post_video %}
+            <div class="post-detail-video-wrapper" style="border-top: 1px solid #000000; margin-top: 30px; padding-top: 25px;">
+                <h4 style="font-family: var(--font-heading); font-size: 13px; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; color: #000000;"><i class="fa-solid fa-circle-play"></i> Video Attachment</h4>
+                <video controls style="width: 100%; border: 1px solid #000000; background: #000000; display: block;">
+                    <source src="{{ post.post_video.url }}">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- Author Biography Segment -->
+    <section class="author-biography-box glass-panel">
+        <div class="bio-avatar-col">
+            <span class="bio-large-emoji">{{ post.author.profile.avatar_emoji }}</span>
+        </div>
+        <div class="bio-details-col">
+            <span class="bio-label">ABOUT THE AUTHOR</span>
+            <h4>
+                <a href="{% url 'author_feed' post.author.username %}">{{ post.author.profile.name }}</a>
+            </h4>
+            <p class="bio-text">{{ post.author.profile.bio }}</p>
+            <a href="{% url 'author_feed' post.author.username %}" class="bio-feed-link">
+                View all stories by {{ post.author.profile.name }} <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Interactive Comments Column -->
+    <section class="post-comments-section glass-panel" id="comments-wrapper">
+        <h3 class="comments-section-title">
+            <i class="fa-regular fa-comments"></i> Discussion (<span id="comment-count-badge">{{ comments.count }}</span>)
+        </h3>
+
+        <!-- Comments Threads List -->
+        <div class="comments-feed-list" id="comments-list">
+            {% if comments %}
+                {% for comment in comments %}
+                    <div class="comment-bubble-card">
+                        <div class="comment-header">
+                            <div class="commenter-meta">
+                                <span class="commenter-avatar">
+                                    {% if comment.author %}
+                                        {{ comment.author.profile.avatar_emoji }}
+                                    {% else %}
+                                        👤
+                                    {% endif %}
+                                </span>
+                                <span class="commenter-name">{{ comment.get_author_name }}</span>
+                                {% if comment.author == post.author %}
+                                    <span class="author-badge-indicator">Author</span>
+                                {% endif %}
+                            </div>
+                            <span class="comment-timestamp">{{ comment.date_created|date:"M d, Y \a\t H:i" }}</span>
+                        </div>
+                        <div class="comment-body">
+                            <p>{{ comment.content }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-comments-state" id="no-comments-prompt">
+                    <i class="fa-regular fa-comment-dots empty-comments-icon"></i>
+                    <p>No comments published yet. Be the first to share your thoughts!</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Add Comment Form Container -->
+        <div class="add-comment-form-panel">
+            <h4 class="form-title">Join the Conversation</h4>
+            
+            <form method="POST" action="{% url 'add_comment' post.slug %}" id="comment-form" class="comment-form-layout">
+                {% csrf_token %}
+                <input type="hidden" name="ajax" value="true">
+
+                {% if not request.user.is_authenticated %}
+                    <div class="form-group-floating mb-4">
+                        <input type="text" name="author_name" id="author_name" placeholder=" " required>
+                        <label for="author_name"><i class="fa-regular fa-user"></i> Display Name</label>
+                        <div class="input-focus-line"></div>
+                    </div>
+                {% endif %}
+
+                <div class="form-group-floating textarea-group mb-4">
+                    <textarea name="content" id="comment_content" placeholder=" " rows="3" required></textarea>
+                    <label for="comment_content"><i class="fa-regular fa-pen-to-square"></i> Type your comment...</label>
+                    <div class="input-focus-line"></div>
+                </div>
+
+                <button type="submit" class="comment-submit-btn">
+                    <span>Post Comment</span> <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </section>
+</article>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Asynchronous comment posting handler
+    const commentForm = document.getElementById('comment-form');
+    const commentsList = document.getElementById('comments-list');
+    const commentCountBadge = document.getElementById('comment-count-badge');
+    const noCommentsPrompt = document.getElementById('no-comments-prompt');
+
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const actionUrl = this.getAttribute('action');
+
+            // Set loading state
+            const submitBtn = this.querySelector('.comment-submit-btn');
+            const originalBtnHtml = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span>Sending...</span> <i class="fa-solid fa-spinner fa-spin"></i>`;
+
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to submit comment.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Create and append the new comment element
+                    const newComment = document.createElement('div');
+                    newComment.className = 'comment-bubble-card animate-comment-in';
+                    newComment.innerHTML = `
+                        <div class="comment-header">
+                            <div class="commenter-meta">
+                                <span class="commenter-avatar">${data.avatar}</span>
+                                <span class="commenter-name">${data.author}</span>
+                                ${data.author === '{{ post.author.profile.name }}' ? '<span class="author-badge-indicator">Author</span>' : ''}
+                            </div>
+                            <span class="comment-timestamp">${data.date}</span>
+                        </div>
+                        <div class="comment-body">
+                            <p>${escapeHtml(data.content)}</p>
+                        </div>
+                    `;
+
+                    // Remove empty comments helper prompt if it exists
+                    if (noCommentsPrompt) {
+                        noCommentsPrompt.remove();
+                    }
+
+                    commentsList.appendChild(newComment);
+                    
+                    // Increment discussion badges count
+                    const currentCount = parseInt(commentCountBadge.textContent) || 0;
+                    commentCountBadge.textContent = currentCount + 1;
+
+                    // Clear textarea input
+                    document.getElementById('comment_content').value = '';
+                    
+                    // Trigger scroll animation
+                    newComment.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            })
+            .catch(error => {
+                console.error(error);
+                alert("Oops! There was an issue submitting your comment. Please try again.");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            });
+        });
+    }
+
+    // Helper function to escape HTML string
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+</script>
+{% endblock %}
