@@ -471,6 +471,8 @@ hr {
     flex-grow: 1;
     font-size: 15px;
     color: #000000;
+    min-width: 0;
+    width: 100%;
 }
 
 .search-form-container input::placeholder {
@@ -1936,6 +1938,20 @@ hr {
     }
     .hero-subtitle {
         font-size: 15.5px;
+    }
+    .search-form-container {
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+    .search-btn {
+        width: 100%;
+    }
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    .footer-container > div:last-child {
+        grid-column: span 1;
     }
     .articles-grid {
         grid-template-columns: 1fr;

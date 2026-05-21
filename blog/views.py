@@ -437,7 +437,22 @@ def add_comment(request, slug):
     return redirect('post_detail', slug=post.slug)
 
 def contact_us(request):
+    import time
     if request.method == 'POST':
+        # 1. Anti-Spam Honeypot Check
+        honeypot = request.POST.get('website_url_honey', '')
+        if honeypot:
+            # Bot detected: fail silently by pretending it was successful
+            messages.success(request, "Thank you! Your message has been sent successfully. We will reach back shortly.")
+            return redirect('contact_us')
+            
+        # 2. Rate Limiting Check (max 1 message every 3 minutes per session)
+        last_submission = request.session.get('last_contact_time', 0)
+        current_time = time.time()
+        if current_time - last_submission < 180: # 180 seconds = 3 minutes
+            messages.error(request, "You are sending messages too quickly. Please wait a few minutes before trying again.")
+            return redirect('contact_us')
+
         name = request.POST.get('name', '').strip()
         email = request.POST.get('email', '').strip()
         subject = request.POST.get('subject', '').strip()
@@ -452,6 +467,23 @@ def contact_us(request):
                 subject=subject,
                 message=message
             )
+            
+            # Send email notification
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                
+                send_mail(
+                    subject=f"New Contact Request: {subject}",
+                    message=f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}",
+                    from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@everydaygobez.com'),
+                    recipient_list=[getattr(settings, 'ADMIN_EMAIL', 'admin@everydaygobez.com')],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
+            request.session['last_contact_time'] = current_time
             messages.success(request, f"Thank you, {name}! Your message has been sent successfully. We will reach back shortly.")
             return redirect('contact_us')
 
