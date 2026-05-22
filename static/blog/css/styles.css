@@ -2143,3 +2143,58 @@ glass {
         padding: 10px;
     }
 }
+
+/* Login page spacing and button alignment fixes */
+.auth-submit-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+    height: auto; /* ensure height adapts to padding */
+    display: inline-block;
+    line-height: normal;
+}
+
+.google-auth-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+    height: auto;
+    white-space: nowrap; /* keep text on one line */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Increase spacing around the OR separator */
+.auth-section-container > div[style*="margin: 25px 0"] {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+/* Ensure consistent vertical gap between form groups */
+.form-group-floating {
+    margin-bottom: 16px;
+}
+
+/* Extra spacing for the login/auth pages */
+.auth-section-container {
+    padding: 30px 20px; /* overall container padding */
+}
+
+.auth-card {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.form-group-floating {
+    margin-bottom: 20px; /* vertical gap between inputs */
+}
+
+.auth-submit-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+}
+
+.auth-section-container > div[style*="margin: 25px 0"] {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
