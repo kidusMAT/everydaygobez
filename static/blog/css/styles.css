@@ -2154,13 +2154,29 @@ glass {
 }
 
 .google-auth-btn {
+    width: 100%;
+    border: 1px solid #000000;
+    background: #ffffff;
+    color: #000000;
     padding: 12px 20px;
+    font-weight: 700;
     font-size: 1rem;
     height: auto;
+    cursor: pointer;
     white-space: nowrap; /* keep text on one line */
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
+    transition: 0.2s ease-in-out;
+    border-radius: 0px;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.google-auth-btn:hover {
+    background: #000000;
+    color: #ffffff;
 }
 
 /* Increase spacing around the OR separator */
