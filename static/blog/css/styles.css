@@ -2220,3 +2220,15 @@ glass {
     max-width: 900px;
 }
 
+@media (max-width: 600px) {
+    .form-section-container {
+        padding: 10px;
+    }
+    .post-form-card {
+        padding: 15px;
+        width: 100%;
+        border-radius: 0; /* Optional: edge-to-edge look on mobile */
+    }
+}
+
+
