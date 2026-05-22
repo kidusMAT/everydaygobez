@@ -2214,3 +2214,9 @@ glass {
     margin-top: 30px;
     margin-bottom: 30px;
 }
+
+/* Make post creation form wider than standard auth cards */
+.post-form-card {
+    max-width: 900px;
+}
+
