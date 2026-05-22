@@ -471,6 +471,8 @@ hr {
     flex-grow: 1;
     font-size: 15px;
     color: #000000;
+    min-width: 0;
+    width: 100%;
 }
 
 .search-form-container input::placeholder {
@@ -1937,6 +1939,20 @@ hr {
     .hero-subtitle {
         font-size: 15.5px;
     }
+    .search-form-container {
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+    .search-btn {
+        width: 100%;
+    }
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    .footer-container > div:last-child {
+        grid-column: span 1;
+    }
     .articles-grid {
         grid-template-columns: 1fr;
     }
@@ -2001,4 +2017,200 @@ hr {
 @keyframes comment-scale-up {
     from { transform: scale(0.95); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
+}
+
+/* --- Custom <gobez> Tag Styling (Premium Badge) --- */
+gobez {
+    display: inline-block;
+    background: linear-gradient(135deg, #000000 0%, #333333 100%);
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    animation: gobez-pulse 3s infinite ease-in-out;
+    cursor: default;
+    vertical-align: middle;
+}
+
+gobez::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-20deg);
+    animation: gobez-shine 4s infinite linear;
+}
+
+@keyframes gobez-pulse {
+    0% { transform: scale(1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+    50% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); }
+    100% { transform: scale(1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+}
+
+@keyframes gobez-shine {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
+}
+
+/* --- Custom <neon> Tag --- */
+neon {
+    color: #fff;
+    background: #000;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #0ff,
+        0 0 40px #0ff,
+        0 0 80px #0ff;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+/* --- Custom <glitch> Tag --- */
+glitch {
+    position: relative;
+    color: white;
+    background: black;
+    display: inline-block;
+    padding: 2px 8px;
+    font-weight: bold;
+    animation: glitch-anim 0.3s infinite linear alternate-reverse;
+}
+@keyframes glitch-anim {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+/* --- Custom <warn> Tag --- */
+warn {
+    background-color: #ffcc00;
+    color: #000;
+    font-weight: 900;
+    padding: 2px 8px;
+    border: 2px solid #000;
+    text-transform: uppercase;
+}
+
+/* --- Custom <glass> Tag --- */
+glass {
+    background: rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: #000;
+    font-weight: 600;
+}
+/* Responsive adjustments for auth pages */
+@media (max-width: 600px) {
+    .auth-section-container {
+        padding: 15px;
+        margin: 0 auto;
+    }
+    .auth-card {
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+    }
+    .auth-header h2 {
+        font-size: 1.5rem;
+    }
+    .auth-submit-btn {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+    .google-auth-btn {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+}
+
+/* Login page spacing and button alignment fixes */
+.auth-submit-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+    height: auto; /* ensure height adapts to padding */
+    display: inline-block;
+    line-height: normal;
+}
+
+.google-auth-btn {
+    width: 100%;
+    border: 1px solid #000000;
+    background: #ffffff;
+    color: #000000;
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 1rem;
+    height: auto;
+    cursor: pointer;
+    white-space: nowrap; /* keep text on one line */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: 0.2s ease-in-out;
+    border-radius: 0px;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.google-auth-btn:hover {
+    background: #000000;
+    color: #ffffff;
+}
+
+/* Increase spacing around the OR separator */
+.auth-section-container > div[style*="margin: 25px 0"] {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+/* Ensure consistent vertical gap between form groups */
+.form-group-floating {
+    margin-bottom: 16px;
+}
+
+/* Extra spacing for the login/auth pages */
+.auth-section-container {
+    padding: 30px 20px; /* overall container padding */
+}
+
+.auth-card {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.form-group-floating {
+    margin-bottom: 20px; /* vertical gap between inputs */
+}
+
+.auth-submit-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+}
+
+.auth-section-container > div[style*="margin: 25px 0"] {
+    margin-top: 30px;
+    margin-bottom: 30px;
 }

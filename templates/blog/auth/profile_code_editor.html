@@ -1,0 +1,283 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Live Code Studio | Everyday Gobez{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Full width container for the split screen */
+    .studio-container {
+    display: flex;
+    height: calc(100vh - 80px); /* Adjust based on navbar height */
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #f5f5f5;
+    border-top: 1px solid #000;
+    overflow: hidden;
+}
+
+/* Divider for resizing split panes */
+.divider {
+    width: 6px;
+    background: #333;
+    cursor: col-resize;
+    user-select: none;
+    flex: 0 0 6px; /* ensure divider has fixed width in flex container */
+}
+
+    .editor-pane {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #000;
+        background: #1e1e1e;
+        color: #fff;
+    }
+
+    .editor-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-bottom: 1px solid #333;
+    }
+
+    .editor-section:last-child {
+        border-bottom: none;
+    }
+
+    .editor-header {
+        padding: 5px 20px;
+        background: #000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #333;
+    }
+
+    .editor-header h3 {
+        font-family: var(--font-heading);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+
+    .editor-textarea {
+        display: none; /* Hidden, we use Ace editor now */
+    }
+
+    .ace-editor {
+        flex: 1;
+        width: 100%;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+    }
+
+    .preview-pane {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        overflow-y: auto;
+    }
+
+    .preview-header {
+        padding: 10px 20px;
+        background: #fff;
+        border-bottom: 1px solid #000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .preview-header h3 {
+        font-family: var(--font-heading);
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 0;
+        color: #000;
+    }
+
+    .preview-content {
+        padding: 40px;
+        flex: 1;
+    }
+
+    /* Remove main layout padding for this view */
+    .main-content {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    /* Hide standard footer on this page */
+    footer {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="studio-container">
+    <!-- Code Editor Pane -->
+    <div class="editor-pane">
+        <form method="POST" id="code-form" style="display: flex; flex-direction: column; height: 100%;">
+            {% csrf_token %}
+            <div class="editor-section">
+                <div class="editor-header">
+                    <h3><i class="fa-solid fa-code"></i> HTML Structure</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="{% url 'profile_edit' %}" class="btn-editor-cancel" style="background: transparent; color: #fff; border-color: #555; padding: 3px 10px; font-size: 11px;">Back</a>
+                        <button type="submit" class="btn-editor-submit" style="padding: 3px 10px; font-size: 11px;">Save Code</button>
+                    </div>
+                </div>
+                <div id="ace-editor-html" class="ace-editor"></div>
+                <textarea name="custom_hero_html" id="html-input" class="editor-textarea">{{ profile.custom_hero_html|default:'' }}</textarea>
+            </div>
+            
+            <div class="editor-section">
+                <div class="editor-header">
+                    <h3><i class="fa-brands fa-css3-alt"></i> CSS Styles</h3>
+                </div>
+                <div id="ace-editor-css" class="ace-editor"></div>
+                <textarea name="custom_hero_css" id="css-input" class="editor-textarea">{{ profile.custom_hero_css|default:'' }}</textarea>
+            </div>
+        </form>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Live Preview Pane -->
+    <div class="preview-pane">
+        <div class="preview-header">
+            <h3><i class="fa-solid fa-eye"></i> Live Preview</h3>
+            <span id="save-status" style="font-size: 12px; color: #777;"></span>
+        </div>
+        <div class="preview-content">
+            <div id="live-preview-container" class="custom-hero-container">
+                {{ profile.custom_hero_html|safe }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ace.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ext-language_tools.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const htmlInput = document.getElementById('html-input');
+        const cssInput = document.getElementById('css-input');
+        const previewContainer = document.getElementById('live-preview-container');
+        const container = document.querySelector('.studio-container');
+        const editorPane = document.querySelector('.editor-pane');
+        const previewPane = document.querySelector('.preview-pane');
+        
+        // Initialize Ace Editor for HTML
+        var htmlEditor = ace.edit("ace-editor-html");
+        htmlEditor.setTheme("ace/theme/tomorrow_night_eighties");
+        htmlEditor.session.setMode("ace/mode/html");
+        htmlEditor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            showPrintMargin: false,
+            fontSize: "14px"
+        });
+        htmlEditor.getSession().setValue(htmlInput.value);
+
+        // Initialize Ace Editor for CSS
+        var cssEditor = ace.edit("ace-editor-css");
+        cssEditor.setTheme("ace/theme/tomorrow_night_eighties");
+        cssEditor.session.setMode("ace/mode/css");
+        cssEditor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            showPrintMargin: false,
+            fontSize: "14px"
+        });
+        cssEditor.getSession().setValue(cssInput.value);
+        
+        function updatePreview() {
+            const htmlVal = htmlEditor.getSession().getValue();
+            const cssVal = cssEditor.getSession().getValue();
+            
+            htmlInput.value = htmlVal;
+            cssInput.value = cssVal;
+            
+            previewContainer.innerHTML = "<style>" + cssVal + "</style>" + htmlVal;
+        }
+
+        // Update live preview and hidden textarea on input
+        htmlEditor.getSession().on('change', updatePreview);
+        cssEditor.getSession().on('change', updatePreview);
+        
+        // Initial preview render
+        updatePreview();
+
+        // Resizable split panes
+        const divider = document.querySelector('.divider');
+        let isDragging = false;
+        divider.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            document.body.style.cursor = 'col-resize';
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            const containerRect = container.getBoundingClientRect();
+            let offset = e.clientX - containerRect.left;
+            const minWidth = 200; // minimum width for each pane
+            const maxWidth = containerRect.width - minWidth;
+            if (offset < minWidth) offset = minWidth;
+            if (offset > maxWidth) offset = maxWidth;
+            const leftPercent = (offset / containerRect.width) * 100;
+            editorPane.style.flex = `0 0 ${leftPercent}%`;
+            previewPane.style.flex = `0 0 ${100 - leftPercent}%`;
+        });
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                document.body.style.cursor = '';
+            }
+        });
+
+        // Simple AJAX save to prevent page reload
+        const codeForm = document.getElementById('code-form');
+        const saveStatus = document.getElementById('save-status');
+
+        codeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const actionUrl = this.getAttribute('action') || window.location.href;
+
+            saveStatus.textContent = "Saving...";
+            saveStatus.style.color = "#777";
+
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    saveStatus.textContent = "Saved Successfully!";
+                    saveStatus.style.color = "#28a745";
+                } else {
+                    saveStatus.textContent = "Error: " + data.error;
+                    saveStatus.style.color = "#dc3545";
+                }
+                setTimeout(() => {
+                    if(saveStatus.textContent.includes("Saved")) saveStatus.textContent = "";
+                }, 3000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                saveStatus.textContent = "Network error. Try again.";
+                saveStatus.style.color = "#dc3545";
+            });
+        });
+    });
+</script>
+{% endblock %}

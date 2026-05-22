@@ -61,8 +61,8 @@
             </div>
         {% endif %}
 
-        <div class="content-rich-text">
-            {{ post.content|linebreaks }}
+        <div class="content-rich-text" style="line-height: 1.8;">
+            {{ post.content|safe }}
         </div>
 
         {% if post.post_video %}
@@ -77,21 +77,28 @@
     </section>
 
     <!-- Author Biography Segment -->
-    <section class="author-biography-box glass-panel">
-        <div class="bio-avatar-col">
-            <span class="bio-large-emoji">{{ post.author.profile.avatar_emoji }}</span>
+    {% if post.author.profile.custom_hero_html %}
+        <div class="custom-hero-container" style="margin-top: 40px; margin-bottom: 40px;">
+            <style>{{ post.author.profile.custom_hero_css|safe }}</style>
+            {{ post.author.profile.custom_hero_html|safe }}
         </div>
-        <div class="bio-details-col">
-            <span class="bio-label">ABOUT THE AUTHOR</span>
-            <h4>
-                <a href="{% url 'author_feed' post.author.username %}">{{ post.author.profile.name }}</a>
-            </h4>
-            <p class="bio-text">{{ post.author.profile.bio }}</p>
-            <a href="{% url 'author_feed' post.author.username %}" class="bio-feed-link">
-                View all stories by {{ post.author.profile.name }} <i class="fa-solid fa-arrow-right"></i>
-            </a>
-        </div>
-    </section>
+    {% else %}
+        <section class="author-biography-box glass-panel">
+            <div class="bio-avatar-col">
+                <span class="bio-large-emoji">{{ post.author.profile.avatar_emoji }}</span>
+            </div>
+            <div class="bio-details-col">
+                <span class="bio-label">ABOUT THE AUTHOR</span>
+                <h4>
+                    <a href="{% url 'author_feed' post.author.username %}">{{ post.author.profile.name }}</a>
+                </h4>
+                <p class="bio-text">{{ post.author.profile.bio }}</p>
+                <a href="{% url 'author_feed' post.author.username %}" class="bio-feed-link">
+                    View all stories by {{ post.author.profile.name }} <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </section>
+    {% endif %}
 
     <!-- Interactive Comments Column -->
     <section class="post-comments-section glass-panel" id="comments-wrapper">

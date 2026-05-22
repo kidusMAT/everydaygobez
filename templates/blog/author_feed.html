@@ -10,6 +10,20 @@
     </div>
 
     <!-- Immersive Author Profile Card -->
+    {% if author_user.profile.custom_hero_html %}
+        <div class="custom-hero-container" style="margin-bottom: 40px;">
+            <style>{{ author_user.profile.custom_hero_css|safe }}</style>
+            {{ author_user.profile.custom_hero_html|safe }}
+            
+            {% if request.user == author_user %}
+                <div style="text-align: right; margin-top: 10px;">
+                    <a href="{% url 'profile_edit' %}" class="nav-btn-outline" title="Edit Profile">
+                        <i class="fa-regular fa-pen-to-square"></i> Edit Custom Code
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
     <section class="author-profile-hero glass-panel">
         <div class="profile-header-cols">
             <div class="profile-avatar-wrapper">
@@ -36,6 +50,7 @@
             </div>
         </div>
     </section>
+    {% endif %}
 
     <!-- Author Publications Feed Grid -->
     <section class="author-stories-feed">

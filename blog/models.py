@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
+from django.utils.html import strip_tags
 import math
 
 class Profile(models.Model):
@@ -10,6 +11,8 @@ class Profile(models.Model):
     bio = models.TextField(blank=True, max_length=500, default="A passionate writer on Everyday Gobez!")
     avatar_emoji = models.CharField(max_length=10, default="🚀")
     display_name = models.CharField(max_length=50, blank=True)
+    custom_hero_html = models.TextField(blank=True, null=True, help_text="Custom HTML for the profile hero section.")
+    custom_hero_css = models.TextField(blank=True, null=True, help_text="Custom CSS for the author's profile hero section.")
 
     def __str__(self):
         return self.display_name or self.user.username
@@ -66,7 +69,7 @@ class Post(models.Model):
         
         if not self.excerpt and self.content:
             # Generate excerpt from content
-            clean_content = self.content.replace('#', '').replace('*', '').replace('`', '').strip()
+            clean_content = strip_tags(self.content).replace('&nbsp;', ' ').strip()
             self.excerpt = clean_content[:180] + "..." if len(clean_content) > 180 else clean_content
 
         super().save(*args, **kwargs)

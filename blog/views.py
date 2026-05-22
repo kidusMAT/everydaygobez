@@ -12,7 +12,40 @@ import secrets
 import random
 from django.urls import reverse
 from django.conf import settings
+from html.parser import HTMLParser
 
+class SafeHTMLParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.tags = []
+        self.is_valid = True
+        self.forbidden_tags = {'script', 'iframe', 'object', 'embed', 'applet', 'form', 'base', 'link', 'meta'}
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.forbidden_tags:
+            self.is_valid = False
+        if tag not in ['br', 'img', 'hr', 'input', 'meta', 'link', 'source']:
+            self.tags.append(tag)
+
+    def handle_endtag(self, tag):
+        if not self.tags or self.tags[-1] != tag:
+            self.is_valid = False
+        elif self.tags:
+            self.tags.pop()
+
+def validate_custom_html(html_str):
+    if not html_str:
+        return True, ""
+    parser = SafeHTMLParser()
+    try:
+        parser.feed(html_str)
+        if not parser.is_valid:
+            return False, "Code contains forbidden tags (like script, iframe) or syntax errors."
+        if len(parser.tags) > 0:
+            return False, f"Unclosed tags detected: {', '.join(parser.tags)}"
+        return True, ""
+    except Exception as e:
+        return False, f"HTML parsing error: {str(e)}"
 
 def auth_login(request):
     if request.user.is_authenticated:
@@ -213,16 +246,46 @@ def profile_edit(request):
         display_name = request.POST.get('display_name', '').strip()
         avatar_emoji = request.POST.get('avatar_emoji', '🚀')
         bio = request.POST.get('bio', '').strip()
+        custom_hero_html = request.POST.get('custom_hero_html', '').strip()
 
-        profile.display_name = display_name
-        profile.avatar_emoji = avatar_emoji
-        profile.bio = bio
-        profile.save()
-        messages.success(request, "Your profile was updated successfully!")
-        return redirect('post_list')
+        is_valid, error_msg = validate_custom_html(custom_hero_html)
+        if not is_valid:
+            messages.error(request, f"Custom code error: {error_msg}")
+        else:
+            profile.display_name = display_name
+            profile.avatar_emoji = avatar_emoji
+            profile.bio = bio
+            profile.custom_hero_html = custom_hero_html
+            profile.save()
+            messages.success(request, "Your profile was updated successfully!")
+            return redirect('post_list')
 
     emojis = ['🚀', '🧠', '💻', '🎨', '🦁', '⚡', '✨', '🔥', '📚', '🌟', '🦄', '🎯']
     return render(request, 'blog/auth/profile_edit.html', {'profile': profile, 'emojis': emojis})
+
+@login_required
+def profile_code_editor(request):
+    profile = request.user.profile
+    if request.method == 'POST':
+        custom_hero_html = request.POST.get('custom_hero_html', '').strip()
+        custom_hero_css = request.POST.get('custom_hero_css', '').strip()
+        is_valid, error_msg = validate_custom_html(custom_hero_html)
+        if not is_valid:
+            # Send Json response if it's an AJAX request (for live preview validation if we add it), 
+            # otherwise standard message.
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': error_msg}, status=400)
+            messages.error(request, f"Custom HTML error: {error_msg}")
+        else:
+            profile.custom_hero_html = custom_hero_html
+            profile.custom_hero_css = custom_hero_css
+            profile.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': 'Saved successfully.'})
+            messages.success(request, "Your custom profile code was saved successfully!")
+            return redirect('author_feed', username=request.user.username)
+
+    return render(request, 'blog/auth/profile_code_editor.html', {'profile': profile})
 
 def post_list(request, category_slug=None):
     posts = Post.objects.filter(is_published=True)
